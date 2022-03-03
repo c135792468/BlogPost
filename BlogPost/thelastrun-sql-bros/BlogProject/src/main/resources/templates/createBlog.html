@@ -1,0 +1,192 @@
+    <!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <script src="https://cdn.tiny.cloud/1/kv84ux6475vze9q7c0y7vjbgje7hlt9eu3pz3l9xo24f7oax/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script>
+
+  <!-- Bootstrap CSS -->
+  <link rel="icon" href="data:;base64,iVBORw0KGgo=">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css" integrity="sha384-hWVjflwFxL6sNzntih27bfxkr27PmbbK/iSvJ+a4+0owXq79v+lsFkW54bOGbiDQ" crossorigin="anonymous">
+  <title>Sarah's Thoughts</title>
+</head>
+
+<body>
+  <!--Begin main body -->
+  <!-- Navbar -->
+  <div class="container">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="#">Sarah's Thoughts </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+          <div class="navbar-nav">
+            <a class="nav-link" th:href="@{/}">Home</a>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Blogs
+              </a>
+              <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                <a class="dropdown-item" th:href="@{/}">View Blogs</a>
+                <a class="dropdown-item" sec:authorize="isAuthenticated()" th:href="@{/createBlog}">Create Blog</a>
+              </div>
+            </li>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Pages
+              </a>
+              <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                <a class="dropdown-item" th:href="@{/pages}">View Pages</a>
+                <a class="dropdown-item"  sec:authorize="hasRole('ROLE_ADMIN')" th:href="@{/createStatic}">Create Page</a>
+              </div>
+            </li>
+            <a class="nav-link" th:href="@{/about}">About</a>
+            <a class="nav-link" th:href="@{/admin}">Admin</a>
+            <a class="nav-link" th:href="@{/login}">Login</a>
+            <a class="nav-link" sec:authorize="isAuthenticated()" th:href="@{/register}">Signup</a>
+          </div>
+        </div>
+      </div>
+    </nav>
+  </div>
+  <!-- End Navbar -->
+
+  <div class="container">
+    <h1 class="p-3 font-weight-bold bg-light">Blog Creator</h1>
+    
+    <form type="form" th:action="@{/createBlog}" method="POST">
+      <div class="row">
+        <div class="col-md-9">
+          <label for="blogName">Blog Title</label>
+          <div>
+            <input type="text" name="blogName" id="blogName" class="form-control" style="width:100%" maxlength="128" placeholder="Enter Title of post" />
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-9">
+          <label for="blogContent">Blog Content</label>
+          <textarea id="blogContent" name="blogContent" style="width:100%; height:600px" placeholder="Enter the body of the post here."></textarea>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-9">
+          <input type="submit" class="btn-primary" value="Submit" />
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <!-- End main body -->
+
+  <!-- Optional JavaScript -->
+  <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+  <script>
+    tinymce.init({
+      selector: 'textarea',
+      plugins: 'a11ychecker image advcode casechange export formatpainter linkchecker autolink lists checklist media mediaembed pageembed permanentpen powerpaste table advtable tinycomments tinymcespellchecker',
+      toolbar: 'a11ycheck image addcomment showcomments casechange checklist code export formatpainter pageembed permanentpen table',
+      toolbar_mode: 'floating',
+      tinycomments_mode: 'embedded',
+      tinycomments_author: 'Author name',
+  /* enable title field in the Image dialog*/
+  image_title: true,
+  /* enable automatic uploads of images represented by blob or data URIs*/
+  automatic_uploads: true,
+  /*
+    URL of our upload handler (for more details check: https://www.tiny.cloud/docs/configure/file-image-upload/#images_upload_url)
+    images_upload_url: 'postAcceptor.php',
+    here we add custom filepicker only to Image dialog
+  */
+  file_picker_types: 'image',
+  /* and here's our custom image picker*/
+  file_picker_callback: function (cb, value, meta) {
+    var input = document.createElement('input');
+    input.setAttribute('type', 'file');
+    input.setAttribute('accept', 'image/*');
+
+    /*
+      Note: In modern browsers input[type="file"] is functional without
+      even adding it to the DOM, but that might not be the case in some older
+      or quirky browsers like IE, so you might want to add it to the DOM
+      just in case, and visually hide it. And do not forget do remove it
+      once you do not need it anymore.
+    */
+
+    input.onchange = function () {
+      var file = this.files[0];
+
+      var reader = new FileReader();
+      reader.onload = function () {
+        /*
+          Note: Now we need to register the blob in TinyMCEs image blob
+          registry. In the next release this part hopefully won't be
+          necessary, as we are looking to handle it internally.
+        */
+        var id = 'blobid' + (new Date()).getTime();
+        var blobCache =  tinymce.activeEditor.editorUpload.blobCache;
+        var base64 = reader.result.split(',')[1];
+        var blobInfo = blobCache.create(id, file, base64);
+        blobCache.add(blobInfo);
+
+        /* call the callback and populate the Title field with the file name */
+        cb(blobInfo.blobUri(), { title: file.name });
+      };
+      reader.readAsDataURL(file);
+    };
+
+    input.click();
+  },
+  content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }'
+});
+  </script>
+ <!-- Footer -->
+ <footer class="bg-light text-center text-black">
+  <!-- Grid container -->
+  <div class="container p-4 pb-0">
+    <p>Follow on Social!</p>
+    <!-- Section: Social media -->
+    <section class="mb-4">
+      <!-- Facebook -->
+      <a class="btn btn-primary btn-floating m-1" style="background-color: #3b5998;" href="https://facebook.com" role="button"><i class="fab fa-facebook-f"></i></a>
+
+      <!-- Twitter -->
+      <a class="btn btn-primary btn-floating m-1" style="background-color: #55acee;" href="https://twitter.com" role="button"><i class="fab fa-twitter"></i></a>
+
+      <!-- Google -->
+      <!-- <a class="btn btn-primary btn-floating m-1" style="background-color: #dd4b39;" href="#!" role="button"><i class="fab fa-google"></i></a> -->
+
+      <!-- Instagram -->
+      <a class="btn btn-primary btn-floating m-1" style="background-color: #ac2bac;" href="https://instagram.com" role="button"><i class="fab fa-instagram"></i></a>
+
+      <!-- Linkedin -->
+      <a class="btn btn-primary btn-floating m-1" style="background-color: #0082ca;" href="https://linkedin.com" role="button"><i class="fab fa-linkedin-in"></i></a>
+    </section>
+    <!-- Section: Social media -->
+  </div>
+  <!-- Grid container -->
+
+  <!-- Copyright -->
+  <div class="container">
+    <div class="text-center text-white p-3 bg-dark" style="background-color: rgba(0, 0, 0, 0.2);">
+      © 2022 Copyright: M Three Corporate Consulting Ltd trading as mthree.
+    </div>
+  </div>
+  <!-- Copyright -->
+</footer>
+<!-- End main body -->
+
+<!-- Optional JavaScript -->
+<!-- jQuery first, then Popper.js, then Bootstrap JS -->
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+</body>
+
+</html>
